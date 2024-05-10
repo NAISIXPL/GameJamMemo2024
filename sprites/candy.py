@@ -2,7 +2,7 @@ import arcade
 
 # Sprite class for object dropped after killing the enemy
 # x,y - position of sprite
-# candy_type : 1 - red 2 - blue
+
 """textures = {
     1: arcade.texture.load_texture("red.png"),
     0: arcade.texture.load_texture("brown.png"),

@@ -9,4 +9,8 @@ class HighCounter:
 
     def absorb_candy(self, candy: Candy):
         self.current_status += candy.points
+        if self.current_status > 100:
+            self.current_status = 100
+        if self.current_status < 0:
+            self.current_status = 0
         candy.kill()

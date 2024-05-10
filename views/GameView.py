@@ -4,6 +4,7 @@ from sprites.candy import Candy
 from sprites.player_sprite import PlayerSprite
 from utils.high_counter import HighCounter
 from utils.key_tracker import KeyTracker
+from utils.progress_bar import HighBar
 
 PLAYER_MOVE_FORCE = 500
 PLAYER_JUMP_FORCE = 20000
@@ -25,6 +26,7 @@ class GameView(arcade.View):
         self.key_tracker = None
         self.jumped = False
         self.counter = None
+        self.progress = None
 
     def on_show_view(self):
         self.window.set_mouse_visible(False)
@@ -35,6 +37,7 @@ class GameView(arcade.View):
         self.candies.append(Candy(130, 100, 10))
         self.player = PlayerSprite()
         self.counter = HighCounter()
+        self.progress = HighBar(self.counter, self.window.height // 1.25, 725)
         self.player.set_position(self.player_spawn_x, self.player_spawn_y)
         self.physics_engine = arcade.PymunkPhysicsEngine(gravity=(0, -500), damping=1)
         self.physics_engine.add_sprite(self.player,
@@ -60,7 +63,7 @@ class GameView(arcade.View):
             arcade.set_background_color(self.tile_map.background_color)
 
     def on_draw(self):
-        self.clear()
+        self.clear(arcade.color.GRAY)
 
         self.camera.use()
 
@@ -71,6 +74,7 @@ class GameView(arcade.View):
         self.player.draw()
 
         self.gui_camera.use()
+        self.progress.draw()
         # draw menu here
 
     def on_key_press(self, symbol: int, modifiers: int):
