@@ -1,6 +1,8 @@
 import arcade
 
+from sprites.candy import Candy
 from sprites.player_sprite import PlayerSprite
+from utils.high_counter import HighCounter
 from utils.key_tracker import KeyTracker
 
 PLAYER_MOVE_FORCE = 500
@@ -16,21 +18,25 @@ class GameView(arcade.View):
         self.camera = None
         self.gui_camera = None
         self.tile_map = None
+        self.candies = None
         self.scene = None
         self.player = None
         self.physics_engine = None
         self.key_tracker = None
         self.jumped = False
+        self.counter = None
 
     def on_show_view(self):
         self.window.set_mouse_visible(False)
         self.camera = arcade.Camera(self.window.width, self.window.height)
         self.gui_camera = arcade.Camera(self.window.width, self.window.height)
         self.key_tracker = KeyTracker()
-
+        self.candies = arcade.SpriteList()
+        self.candies.append(Candy(130, 100, 10))
         self.player = PlayerSprite()
+        self.counter = HighCounter()
         self.player.set_position(self.player_spawn_x, self.player_spawn_y)
-        self.physics_engine = arcade.PymunkPhysicsEngine(gravity=(0, -500),damping=1)
+        self.physics_engine = arcade.PymunkPhysicsEngine(gravity=(0, -500), damping=1)
         self.physics_engine.add_sprite(self.player,
                                        moment=arcade.PymunkPhysicsEngine.MOMENT_INF,
                                        collision_type="Player", max_horizontal_velocity=200)
@@ -60,7 +66,7 @@ class GameView(arcade.View):
 
         # Draw game here
         self.scene.draw()
-
+        self.candies.draw()
         # Draw player
         self.player.draw()
 
@@ -74,6 +80,10 @@ class GameView(arcade.View):
         self.key_tracker.key_released(_symbol)
 
     def on_update(self, delta_time: float):
+        if self.player.collides_with_list(self.candies):
+            for i in self.candies:
+                if self.player.collides_with_sprite(i):
+                    self.counter.absorb_candy(i)
         if self.player.center_y < 0:
             self.physics_engine.set_position(self.player, (200, 100))
 
