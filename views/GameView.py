@@ -8,10 +8,13 @@ PLAYER_JUMP_FORCE = 1800
 class GameView(arcade.View):
     def __init__(self):
         super().__init__()
-
+        self.player_spawn_x = 100
+        self.player_spawn_y = 100
+        self.tile_scale = 0.5
         self.camera = None
         self.gui_camera = None
-
+        self.tile_map = None
+        self.scene = None
         self.player = None
         self.physics_engine = None
         self.key_tracker = None
@@ -22,16 +25,46 @@ class GameView(arcade.View):
         self.gui_camera = arcade.Camera(self.window.width, self.window.height)
         self.key_tracker = KeyTracker()
 
+
         self.player = PlayerSprite()
         self.player.set_position(200, 200)
         self.physics_engine = arcade.PymunkPhysicsEngine()
         self.physics_engine.add_sprite(self.player, gravity=(0, -500),
                                        collision_type="Player", max_horizontal_velocity=400)
+        self.player.center_x = self.player_spawn_x
+        self.player.center_y = self.player_spawn_y
+
+        # Map loading
+        map_name = "./sprites/test_map.json"
+
+        layer_options = {
+            "Platforms": {
+                "use_spatial_hash": True,
+            },
+            "Coins": {
+                "use_spatial_hash": True,
+            }
+        }
+
+        self.tile_map = arcade.load_tilemap(map_name,self.tile_scale,layer_options)
+        self.scene = arcade.Scene.from_tilemap(self.tile_map)
+        if self.tile_map.background_color:
+            arcade.set_background_color(self.tile_map.background_color)
+
+
+
+        self.physics_engine = None #Add when player sprite is available
+
 
     def on_draw(self):
         self.clear()
 
         self.camera.use()
+
+        # Draw game here
+        self.scene.draw()
+
+        # Draw player
         self.player.draw()
 
         self.gui_camera.use()
@@ -44,6 +77,7 @@ class GameView(arcade.View):
         self.key_tracker.key_released(_symbol)
 
     def on_update(self, delta_time: float):
+
         self.physics_engine.step()
 
         force = [0, 0]
