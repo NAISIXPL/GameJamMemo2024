@@ -4,6 +4,7 @@ from sprites.enemy import Enemy
 import arcade
 from pyglet.math import Vec2
 
+from sprites.bullet import Bullet
 from sprites.candy import Candy
 from sprites.player_sprite import PlayerSprite
 from utils.high_counter import HighCounter
@@ -13,6 +14,7 @@ from utils.progress_bar import HighBar
 
 PLAYER_MOVE_FORCE = 500
 PLAYER_JUMP_FORCE = 20000
+BULLET_FORCE = 2000
 
 
 class GameView(arcade.View):
@@ -25,6 +27,7 @@ class GameView(arcade.View):
         self.gui_camera = None
         self.tile_map = None
         self.candies = None
+        self.bullets = None
         self.scene = None
         self.player = None
         self.physics_engine = None
@@ -40,6 +43,7 @@ class GameView(arcade.View):
         self.counter = None
         self.progress = None
         self.mod_tracker = None
+        self.shot = False
 
     def on_show_view(self):
         self.window.set_mouse_visible(False)
@@ -47,6 +51,7 @@ class GameView(arcade.View):
         self.gui_camera = arcade.Camera(self.window.width, self.window.height)
         self.key_tracker = KeyTracker()
         self.candies = arcade.SpriteList()
+        self.bullets = arcade.SpriteList()
         self.candies.append(Candy(130, 100, 10))
         self.player = PlayerSprite()
         self.counter = HighCounter()
@@ -89,6 +94,11 @@ class GameView(arcade.View):
         if self.tile_map.background_color:
             arcade.set_background_color(self.tile_map.background_color)
 
+        def wall_hit_handler(bullet_sprite, _wall_sprite, _arbiter, _space, _data):
+            bullet_sprite.remove_from_sprite_lists()
+
+        self.physics_engine.add_collision_handler("bullet", "wall", post_handler=wall_hit_handler)
+
     def on_draw(self):
         self.clear(arcade.color.GRAY)
 
@@ -97,6 +107,7 @@ class GameView(arcade.View):
         # Draw game here
         self.scene.draw()
         self.candies.draw()
+        self.bullets.draw()
         # Draw player
         self.player.draw()
 
@@ -112,10 +123,22 @@ class GameView(arcade.View):
         self.key_tracker.key_released(_symbol)
 
     def on_update(self, delta_time: float):
+        if not self.key_tracker[arcade.key.SPACE]:
+            self.shot = False
+        if self.key_tracker[arcade.key.SPACE] and not self.shot:
+            self.shot = True
+            bullet = Bullet(self.mod_tracker.player_damage(1))
+            self.physics_engine.add_sprite(bullet, mass=0.1, damping=1, friction=0.6, gravity=(0, -300),
+                                           collision_type="bullet")
+            self.physics_engine.set_position(bullet, (self.player.center_x + 16 * self.player.direction,
+                                                      self.player.center_y))
+            self.physics_engine.set_velocity(bullet, (self.player.direction * BULLET_FORCE, 0))
+            self.bullets.append(bullet)
         if self.player.collides_with_list(self.candies):
             for i in self.candies:
                 if self.player.collides_with_sprite(i):
                     self.counter.absorb_candy(i)
+
         if self.player.center_y < 0:
             self.physics_engine.set_position(self.player, (340, 100))
 

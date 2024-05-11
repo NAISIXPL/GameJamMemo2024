@@ -1,7 +1,7 @@
 import arcade
 
-LEFT = 1
-RIGHT = 0
+LEFT = -1
+RIGHT = 1
 DEAD_ZONE = 0.1
 
 

@@ -6,7 +6,8 @@ class KeyTracker:
         self.state = {
             arcade.key.RIGHT: False,
             arcade.key.LEFT: False,
-            arcade.key.UP: False
+            arcade.key.UP: False,
+            arcade.key.SPACE: False
         }
 
     def key_pressed(self, key):
@@ -17,4 +18,3 @@ class KeyTracker:
 
     def __getitem__(self, key):
         return self.state[key]
-

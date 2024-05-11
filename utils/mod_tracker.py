@@ -4,7 +4,7 @@ class ModTracker:
 
     def player_damage(self, value):
         if self.high_counter.current_status > self.high_counter.high_thr:
-            return 1.25 * value
+            return 2 * value
         return value
 
     def player_speed(self, value):
