@@ -1,8 +1,8 @@
 import arcade
 
-from views.GameView import GameView
+from views.ViewManager import ViewManager
 
 window = arcade.Window(1024, 768, "Meet IT")
-view = GameView("./assets/tile_map.json", "POLICJA")
-window.show_view(view)
+manager = ViewManager(window)
+manager.next()
 arcade.run()

@@ -13,6 +13,7 @@ from utils.high_counter import HighCounter
 from utils.key_tracker import KeyTracker
 from utils.mod_tracker import ModTracker
 from utils.progress_bar import HighBar
+from views.GameOverView import GameOverView
 
 PLAYER_MOVE_FORCE = 500
 PLAYER_JUMP_FORCE = 20000
@@ -27,10 +28,10 @@ sounds = {
 
 
 class GameView(arcade.View):
-    def __init__(self, map_name, en_type):
+    def __init__(self, manager):
         super().__init__()
-        self.map_name = map_name
-        self.en_type = en_type
+        self.manager = manager
+        self.map_name, self.en_type = manager.get_args()
         self.player_spawn_x = 340
         self.player_spawn_y = 130
         self.tile_scale = 1
@@ -77,7 +78,6 @@ class GameView(arcade.View):
                                        moment=arcade.PymunkPhysicsEngine.MOMENT_INF,
                                        collision_type="Player", max_horizontal_velocity=200)
 
-
         self.tile_map = arcade.load_tilemap(self.map_name, self.tile_scale)
         self.scene = arcade.Scene.from_tilemap(self.tile_map)
         # TODO friction as trait in future
@@ -118,13 +118,12 @@ class GameView(arcade.View):
                 self.candies.append(Candy(_enemy_sprite.center_x, _enemy_sprite.center_y, random.randint(-25, 25)))
                 _enemy_sprite.kill()
 
-
         def player_hit_handler(player, _enemy_sprite, _arbiter, _space, _data):
             self.health -= self.mod_tracker.mob_damage(1)
             if self.health <= 0:
-                print("Game over")
-            if player.center_x - _enemy_sprite.center_x >0:
-                self.physics_engine.apply_impulse(player,[80,0])
+                self.manager.window.show_view(GameOverView(self.manager))
+            if player.center_x - _enemy_sprite.center_x > 0:
+                self.physics_engine.apply_impulse(player, [80, 0])
             else:
                 self.physics_engine.apply_impulse(player, [-80, 0])
 
@@ -157,10 +156,9 @@ class GameView(arcade.View):
                             """
         )
 
-
     def on_draw(self):
         self.clear()
-        self.prog['mixFactor'] = (self.counter.current_status - 50)/70
+        self.prog['mixFactor'] = (self.counter.current_status - 50) / 70
         self.clear(arcade.color.GRAY)
         self.camera.use()
 
@@ -173,8 +171,6 @@ class GameView(arcade.View):
         self.quad_fs.render(self.prog)
         self.gui_camera.use()
         self.progress.draw()
-
-
 
     def on_key_press(self, symbol: int, modifiers: int):
         self.key_tracker.key_pressed(symbol)
