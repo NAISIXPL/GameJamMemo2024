@@ -129,6 +129,7 @@ class GameView(arcade.View):
         self.key_tracker.key_released(_symbol)
 
     def on_update(self, delta_time: float):
+        self.player.update_animation()
         if not self.key_tracker[arcade.key.SPACE]:
             self.shot = False
         if self.key_tracker[arcade.key.SPACE] and not self.shot:
