@@ -7,7 +7,7 @@ class ViewManager:
     def __init__(self, window):
         self.window = window
         self.execution = [StartView, GameView, GameView, GameOverView]
-        self.args_list = [0, ("./assets/tile_map.json", "POLICJA"), ("./assets/tile_map.json", "MENEL")]
+        self.args_list = [0, ("./assets/tile_map.json", "POLICJA",760,340,130), ("./assets/manufaktura_map.json", "MENEL",70,954,224)]
         self.counter = -1
 
     def next(self):

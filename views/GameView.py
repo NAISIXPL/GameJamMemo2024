@@ -32,9 +32,7 @@ class GameView(arcade.View):
     def __init__(self, manager):
         super().__init__()
         self.manager = manager
-        self.map_name, self.en_type = manager.get_args()
-        self.player_spawn_x = 340
-        self.player_spawn_y = 130
+        self.map_name, self.en_type,self.health_x,self.player_spawn_x,self.player_spawn_y = manager.get_args()
         self.tile_scale = 1
         self.health = HealthBar(self.window.height // 1.1)
         self.quad_fs = None
@@ -72,7 +70,7 @@ class GameView(arcade.View):
         self.player = PlayerSprite()
         self.counter = HighCounter()
         self.mod_tracker = ModTracker(self.counter)
-        self.progress = HighBar(self.counter, self.window.height // 1.25, 760)
+        self.progress = HighBar(self.counter, self.window.height // 1.25, self.health_x)
         self.player.set_position(self.player_spawn_x, self.player_spawn_y)
         self.physics_engine = arcade.PymunkPhysicsEngine(gravity=(0, -500), damping=1)
         self.physics_engine.add_sprite(self.player,
@@ -116,7 +114,7 @@ class GameView(arcade.View):
             bullet_sprite.remove_from_sprite_lists()
             if _enemy_sprite.hit(bullet_sprite):
                 sounds["death"].play(volume=1.2)
-                self.candies.append(Candy(_enemy_sprite.center_x, _enemy_sprite.center_y, random.randint(-25, 25)))
+                self.candies.append(Candy(_enemy_sprite.center_x, _enemy_sprite.center_y, random.randint(20, 35)*random.choice([-1,1])))
                 _enemy_sprite.kill()
 
         def player_hit_handler(player, _enemy_sprite, _arbiter, _space, _data):
@@ -184,6 +182,12 @@ class GameView(arcade.View):
         self.key_tracker.key_released(_symbol)
 
     def on_update(self, delta_time: float):
+        if self.player.center_x < 14 and self.player.center_y > 2687:
+            self.manager.next()
+            self.player.center_x = 954
+            self.player.center_y = 224
+        elif self.player.center_x > 623 and self.player.center_y > 2719:
+            self.manager.next()
         if delta_time > 0.02:
             return
         self.physics_engine.step()
