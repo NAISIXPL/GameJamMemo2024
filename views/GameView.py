@@ -1,4 +1,3 @@
-
 import random
 from sprites.enemy import Enemy
 import arcade
@@ -23,6 +22,7 @@ class GameView(arcade.View):
         self.player_spawn_x = 340
         self.player_spawn_y = 100
         self.tile_scale = 1
+        self.quad_fs = None
         self.camera = None
         self.gui_camera = None
         self.tile_map = None
@@ -44,6 +44,8 @@ class GameView(arcade.View):
         self.progress = None
         self.mod_tracker = None
         self.shot = False
+        self.prog = None
+
 
     def on_show_view(self):
         self.window.set_mouse_visible(False)
@@ -105,22 +107,48 @@ class GameView(arcade.View):
         self.physics_engine.add_collision_handler("bullet", "wall", post_handler=wall_hit_handler)
         self.physics_engine.add_collision_handler("bullet", "enemy", post_handler=enemy_hit_handler)
 
-    def on_draw(self):
-        self.clear(arcade.color.GRAY)
+        self.quad_fs = arcade.gl.geometry.quad_2d_fs()
+        self.prog = self.window.ctx.program(
+            vertex_shader="""
+                            #version 330
+                            in vec2 in_vert;
+                            out vec2 v_vert;
+                            void main()
+                            {
+                                v_vert = in_vert;
+                                gl_Position = vec4(in_vert, 0., 1.);
+                            }
+                            """,
+            fragment_shader="""
+                            #version 330
+                            uniform float mixFactor;
+                            in vec2 v_vert;
+                            out vec4 fragColor;
+                            void main() {
+                                vec4 baseColor = vec4(v_vert * 0.5 + 0.5, 0.5,  0.5); 
+                                vec4 neonpink = vec4(1.0, 87.0 / 255.0, 51.0 / 255.0, 1);
+                                fragColor = mix(baseColor, neonpink, mixFactor);
+                            }
+                            """
+        )
 
+    def on_draw(self):
+        self.clear()
+        self.prog['mixFactor'] = 0.2
+        self.clear(arcade.color.GRAY)
         self.camera.use()
 
-        # Draw game here
         self.scene.draw()
         self.candies.draw()
         self.bullets.draw()
-        # Draw player
         self.player.draw()
 
         self.enemies.draw()
+        self.quad_fs.render(self.prog)
         self.gui_camera.use()
         self.progress.draw()
-        # draw menu here
+
+
 
     def on_key_press(self, symbol: int, modifiers: int):
         self.key_tracker.key_pressed(symbol)
@@ -129,7 +157,6 @@ class GameView(arcade.View):
         self.key_tracker.key_released(_symbol)
 
     def on_update(self, delta_time: float):
-        self.player.update_animation()
         if not self.key_tracker[arcade.key.SPACE]:
             self.shot = False
         if self.key_tracker[arcade.key.SPACE] and not self.shot:
