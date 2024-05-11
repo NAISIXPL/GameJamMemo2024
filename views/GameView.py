@@ -1,4 +1,5 @@
 import arcade
+from pyglet.math import Vec2
 
 from sprites.candy import Candy
 from sprites.player_sprite import PlayerSprite
@@ -112,3 +113,11 @@ class GameView(arcade.View):
             self.jumped = True
             force[1] = self.mod_tracker.player_jump(PLAYER_JUMP_FORCE)
         self.physics_engine.apply_force(self.player, force)
+        self.scroll_to()
+
+    def scroll_to(self):
+        y_pos = self.player.center_y - self.window.height / 2
+        if y_pos < 0:
+            y_pos = 0
+        position = Vec2(0, y_pos)
+        self.camera.move_to(position, 1)
