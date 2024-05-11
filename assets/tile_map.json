@@ -986,7 +986,7 @@
  "tilesets":[
         {
          "firstgid":1,
-         "source":"tilemap.tsx"
+         "source":"tilemap.json"
         }],
  "tilewidth":32,
  "type":"map",
