@@ -16,4 +16,3 @@ class Candy(arcade.Sprite):
             self.candy = arcade.Sprite("blue.png")
         else:
             raise ValueError("Invalid candy_type")
-        self.candy.set_hit_box()
