@@ -14,8 +14,8 @@ textures = {
         1: arcade.texture.load_texture("assets/animation/LYSY_L2.png")
     },
     3: {
-        1: arcade.texture.load_texture("assets/animation/LYSY_SP.png"),
-        -1: arcade.texture.load_texture("assets/animation/LYSY_SL.png")
+        -1: arcade.texture.load_texture("assets/animation/LYSY_SP.png"),
+        1: arcade.texture.load_texture("assets/animation/LYSY_SL.png")
     }
 }
 
@@ -29,9 +29,10 @@ class PlayerSprite(arcade.Sprite):
         self.cur_texture = 0
         self.stationary = True
         self.jumping = False
+        self.player = None
 
     def pymunk_moved(self, physics_engine, dx, dy, d_angle):
-        self.jumping = abs(dy) > DEAD_ZONE*0.5
+        self.jumping = abs(dy) > DEAD_ZONE * 0.5
         if dx > DEAD_ZONE:
             self.stationary = False
             self.direction = RIGHT
@@ -49,4 +50,4 @@ class PlayerSprite(arcade.Sprite):
         if self.stationary:
             self.texture = textures[3][self.direction]
         else:
-            self.texture = textures[self.direction][(self.cur_texture %30)//15]
+            self.texture = textures[self.direction][(self.cur_texture % 20) // 10]
