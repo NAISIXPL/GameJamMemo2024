@@ -62,7 +62,6 @@ class GameView(arcade.View):
         self.key_tracker = KeyTracker()
         self.candies = arcade.SpriteList()
         self.bullets = arcade.SpriteList()
-        self.candies.append(Candy(130, 100, 10))
         self.player = PlayerSprite()
         self.counter = HighCounter()
         self.mod_tracker = ModTracker(self.counter)
@@ -77,7 +76,8 @@ class GameView(arcade.View):
 
         self.tile_map = arcade.load_tilemap(map_name, self.tile_scale)
         self.scene = arcade.Scene.from_tilemap(self.tile_map)
-        self.physics_engine.add_sprite_list(self.scene["Platforms"], friction=0.7, collision_type="wall",
+        # TODO friction as trait in future
+        self.physics_engine.add_sprite_list(self.scene["Platforms"], friction=1, collision_type="wall",
                                             body_type=arcade.PymunkPhysicsEngine.STATIC)
         # Position of enemies
         self.start_points = self.tile_map.object_lists["Start_points"]
@@ -90,11 +90,10 @@ class GameView(arcade.View):
 
         for pos in self.end_position:
             for pos2 in self.start_position:
-                if abs(pos[1] - pos2[1]) < 1:
+                if abs(pos[1] - pos2[1]) < 5:
                     self.enemy_position_params.append([pos2, pos])
 
         self.enemies = arcade.SpriteList()
-        self.enemies.append(Enemy(100, 100, 200, 200, 1))
         for elem in self.enemy_position_params:
             self.enemies.append(Enemy(elem[0][0], elem[0][1], elem[1][0], elem[1][1], random.choice([1, 2])))
 
@@ -155,7 +154,7 @@ class GameView(arcade.View):
 
     def on_draw(self):
         self.clear()
-        self.prog['mixFactor'] = 0.2
+        self.prog['mixFactor'] = (self.counter.current_status - 50)/50
         self.clear(arcade.color.GRAY)
         self.camera.use()
 

@@ -12,7 +12,7 @@ class Enemy(arcade.Sprite):
         self.velocity_mul = 1
         self.direction = True  # True - right | False - left
 
-        self.center_x = x_beg + 1
+        self.center_x = x_beg + 5
         self.center_y = y_beg + 5
         if enemy_type == 1:
             self.texture = arcade.make_circle_texture(15, arcade.color.RED)
