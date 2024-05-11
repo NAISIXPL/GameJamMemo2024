@@ -10,14 +10,14 @@ class Enemy(arcade.Sprite):
         self.y_end = y_end
         self.health = 2
         self.velocity_mul = 1
-        self.direction = True # True - right | False - left
+        self.direction = True  # True - right | False - left
 
         self.center_x = x_beg + 1
         self.center_y = y_beg + 5
         if enemy_type == 1:
-            self.texture = arcade.make_circle_texture(10, arcade.color.RED)
+            self.texture = arcade.make_circle_texture(15, arcade.color.RED)
         elif enemy_type == 2:
-            self.texture = arcade.make_circle_texture(10, arcade.color.BLUE)
+            self.texture = arcade.make_circle_texture(15, arcade.color.BLUE)
         else:
             raise ValueError("Invalid enemy_type")
 
@@ -27,6 +27,10 @@ class Enemy(arcade.Sprite):
         elif abs(self.center_x - self.x_end) < 10 and self.direction == True:
             return True
         return False
+
+    def hit(self, bullet):
+        self.health -= bullet.damage
+        return self.health == 0
 
     def if_hitted(self):
         if self.health < 2:

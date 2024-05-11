@@ -14,7 +14,7 @@ from utils.progress_bar import HighBar
 
 PLAYER_MOVE_FORCE = 500
 PLAYER_JUMP_FORCE = 20000
-BULLET_FORCE = 2000
+BULLET_FORCE = 1000
 
 
 class GameView(arcade.View):
@@ -89,7 +89,7 @@ class GameView(arcade.View):
         for elem in self.enemy_position_params:
             self.enemies.append(Enemy(elem[0][0],elem[0][1],elem[1][0],elem[1][1],random.choice([1, 2])))
 
-        self.physics_engine.add_sprite_list(self.enemies,collision_type="Player",moment_of_intertia=arcade.PymunkPhysicsEngine.MOMENT_INF)
+        self.physics_engine.add_sprite_list(self.enemies,collision_type="enemy",moment_of_intertia=arcade.PymunkPhysicsEngine.MOMENT_INF)
 
         if self.tile_map.background_color:
             arcade.set_background_color(self.tile_map.background_color)
@@ -97,7 +97,13 @@ class GameView(arcade.View):
         def wall_hit_handler(bullet_sprite, _wall_sprite, _arbiter, _space, _data):
             bullet_sprite.remove_from_sprite_lists()
 
+        def enemy_hit_handler(bullet_sprite, _enemy_sprite, _arbiter, _space, _data):
+            bullet_sprite.remove_from_sprite_lists()
+            if _enemy_sprite.hit(bullet_sprite):
+                self.candies.append(Candy(_enemy_sprite.center_x, _enemy_sprite.center_y, random.randint(-5, 5)))
+                _enemy_sprite.kill()
         self.physics_engine.add_collision_handler("bullet", "wall", post_handler=wall_hit_handler)
+        self.physics_engine.add_collision_handler("bullet", "enemy", post_handler=enemy_hit_handler)
 
     def on_draw(self):
         self.clear(arcade.color.GRAY)
