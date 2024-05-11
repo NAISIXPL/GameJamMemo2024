@@ -17,9 +17,9 @@ class HighBar(arcade.SpriteList):
         return clr
 
     def draw(self, *, filter=None, pixelated=None, blend_function=None):
-        arcade.draw_lrtb_rectangle_outline(self.x, self.x + 50, self.height, 0, arcade.color.BLACK)
         arcade.draw_lrtb_rectangle_filled(self.x, self.x + 50, self.height * self.high_counter.current_status / 100, 0,
                                           color=self.get_clr())
+        arcade.draw_lrtb_rectangle_outline(self.x, self.x + 50, self.height, 0, arcade.color.BLACK, 3)
         lthr_y = self.height * self.high_counter.lower_thr // 100
         hthr_y = self.height * self.high_counter.high_thr // 100
         arcade.draw_line(self.x, lthr_y, self.x + 50, lthr_y, color=arcade.color.BLACK)

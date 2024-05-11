@@ -27,7 +27,7 @@ class GameView(arcade.View):
     def __init__(self):
         super().__init__()
         self.player_spawn_x = 340
-        self.player_spawn_y = 100
+        self.player_spawn_y = 130
         self.tile_scale = 1
         self.health = 6
         self.quad_fs = None
@@ -65,7 +65,7 @@ class GameView(arcade.View):
         self.player = PlayerSprite()
         self.counter = HighCounter()
         self.mod_tracker = ModTracker(self.counter)
-        self.progress = HighBar(self.counter, self.window.height // 1.25, 725)
+        self.progress = HighBar(self.counter, self.window.height // 1.25, 760)
         self.player.set_position(self.player_spawn_x, self.player_spawn_y)
         self.physics_engine = arcade.PymunkPhysicsEngine(gravity=(0, -500), damping=1)
         self.physics_engine.add_sprite(self.player,
@@ -97,7 +97,7 @@ class GameView(arcade.View):
         for elem in self.enemy_position_params:
             self.enemies.append(Enemy(elem[0][0], elem[0][1], elem[1][0], elem[1][1], random.choice([1, 2])))
 
-        self.physics_engine.add_sprite_list(self.enemies, collision_type="enemy",
+        self.physics_engine.add_sprite_list(self.enemies, collision_type="enemy", friction=0.5,
                                             moment_of_intertia=arcade.PymunkPhysicsEngine.MOMENT_INF)
 
         if self.tile_map.background_color:
@@ -177,6 +177,9 @@ class GameView(arcade.View):
         self.key_tracker.key_released(_symbol)
 
     def on_update(self, delta_time: float):
+        if delta_time > 0.02:
+            return
+        self.physics_engine.step()
         self.player.update_animation()
 
         if not self.key_tracker[arcade.key.SPACE]:
@@ -199,7 +202,6 @@ class GameView(arcade.View):
         if self.player.center_y < 0:
             self.physics_engine.set_position(self.player, (340, 100))
 
-        self.physics_engine.step()
         if not self.key_tracker[arcade.key.UP]:
             self.jumped = False
 
@@ -228,9 +230,9 @@ class GameView(arcade.View):
             if enemy.reached_boundry():
                 enemy.direction = not enemy.direction
             if enemy.direction:  # direction = True -> Movement to the right
-                self.physics_engine.apply_force(enemy, [77 * enemy.velocity_mul, 0])
+                self.physics_engine.apply_force(enemy, [300, 0])
             elif not enemy.direction:
-                self.physics_engine.apply_force(enemy, [-77 * enemy.velocity_mul, 0])
+                self.physics_engine.apply_force(enemy, [-300, 0])
         self.scroll_to()
 
     def scroll_to(self):
