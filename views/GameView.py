@@ -23,6 +23,7 @@ class GameView(arcade.View):
         self.player_spawn_x = 340
         self.player_spawn_y = 100
         self.tile_scale = 1
+        self.health = 6
         self.camera = None
         self.gui_camera = None
         self.tile_map = None
@@ -102,8 +103,18 @@ class GameView(arcade.View):
             if _enemy_sprite.hit(bullet_sprite):
                 self.candies.append(Candy(_enemy_sprite.center_x, _enemy_sprite.center_y, random.randint(-5, 5)))
                 _enemy_sprite.kill()
+
+        def player_hit_handler(player, _enemy_sprite, _arbiter, _space, _data):
+            self.health -= self.mod_tracker.mob_damage(1)
+            if self.health <= 0:
+                print("Game over")
+            if player.center_x - _enemy_sprite.center_x >0:
+                self.physics_engine.apply_impulse(player,[80,0])
+            else:
+                self.physics_engine.apply_impulse(player, [-80, 0])
         self.physics_engine.add_collision_handler("bullet", "wall", post_handler=wall_hit_handler)
         self.physics_engine.add_collision_handler("bullet", "enemy", post_handler=enemy_hit_handler)
+        self.physics_engine.add_collision_handler("Player", "enemy", post_handler=player_hit_handler)
 
     def on_draw(self):
         self.clear(arcade.color.GRAY)
@@ -129,6 +140,7 @@ class GameView(arcade.View):
         self.key_tracker.key_released(_symbol)
 
     def on_update(self, delta_time: float):
+
         if not self.key_tracker[arcade.key.SPACE]:
             self.shot = False
         if self.key_tracker[arcade.key.SPACE] and not self.shot:
