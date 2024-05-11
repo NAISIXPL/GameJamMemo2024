@@ -2,9 +2,9 @@ import arcade
 
 
 class Bullet(arcade.Sprite):
-    def __init__(self, damage):
+    def __init__(self, damage, target):
         super().__init__()
-        self.texture = arcade.make_circle_texture(5, color=arcade.color.RED)
+        self.texture = arcade.load_texture("assets/animation/STRZYKAWKA.png", flipped_horizontally=target)
         self.damage = damage
 
 

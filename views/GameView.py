@@ -1,4 +1,6 @@
 import random
+import time
+
 from sprites.enemy import Enemy
 import arcade
 from pyglet.math import Vec2
@@ -6,6 +8,7 @@ from pyglet.math import Vec2
 from sprites.bullet import Bullet
 from sprites.candy import Candy
 from sprites.player_sprite import PlayerSprite
+from utils.SpriteLoader import SpriteLoader
 from utils.high_counter import HighCounter
 from utils.key_tracker import KeyTracker
 from utils.mod_tracker import ModTracker
@@ -13,7 +16,7 @@ from utils.progress_bar import HighBar
 
 PLAYER_MOVE_FORCE = 500
 PLAYER_JUMP_FORCE = 20000
-BULLET_FORCE = 1000
+BULLET_FORCE = 500
 sounds = {
     "jump": arcade.Sound("assets/sounds/jump.wav"),
     "death": arcade.Sound("assets/sounds/death.wav"),
@@ -24,8 +27,10 @@ sounds = {
 
 
 class GameView(arcade.View):
-    def __init__(self):
+    def __init__(self, map_name, en_type):
         super().__init__()
+        self.map_name = map_name
+        self.en_type = en_type
         self.player_spawn_x = 340
         self.player_spawn_y = 130
         self.tile_scale = 1
@@ -72,9 +77,8 @@ class GameView(arcade.View):
                                        moment=arcade.PymunkPhysicsEngine.MOMENT_INF,
                                        collision_type="Player", max_horizontal_velocity=200)
 
-        map_name = "./assets/tile_map.json"
 
-        self.tile_map = arcade.load_tilemap(map_name, self.tile_scale)
+        self.tile_map = arcade.load_tilemap(self.map_name, self.tile_scale)
         self.scene = arcade.Scene.from_tilemap(self.tile_map)
         # TODO friction as trait in future
         self.physics_engine.add_sprite_list(self.scene["Platforms"], friction=1, collision_type="wall",
@@ -95,7 +99,8 @@ class GameView(arcade.View):
 
         self.enemies = arcade.SpriteList()
         for elem in self.enemy_position_params:
-            self.enemies.append(Enemy(elem[0][0], elem[0][1], elem[1][0], elem[1][1], random.choice([1, 2])))
+            ld = SpriteLoader(f"assets/animation/{self.en_type}", f"{self.en_type}_{random.randint(1, 3)}")
+            self.enemies.append(Enemy(elem[0][0], elem[0][1], elem[1][0], elem[1][1], ld))
 
         self.physics_engine.add_sprite_list(self.enemies, collision_type="enemy", friction=0.5,
                                             moment_of_intertia=arcade.PymunkPhysicsEngine.MOMENT_INF)
@@ -110,7 +115,7 @@ class GameView(arcade.View):
             bullet_sprite.remove_from_sprite_lists()
             if _enemy_sprite.hit(bullet_sprite):
                 sounds["death"].play(volume=1.2)
-                self.candies.append(Candy(_enemy_sprite.center_x, _enemy_sprite.center_y, random.randint(-5, 5)))
+                self.candies.append(Candy(_enemy_sprite.center_x, _enemy_sprite.center_y, random.randint(-25, 25)))
                 _enemy_sprite.kill()
 
 
@@ -152,9 +157,10 @@ class GameView(arcade.View):
                             """
         )
 
+
     def on_draw(self):
         self.clear()
-        self.prog['mixFactor'] = (self.counter.current_status - 50)/50
+        self.prog['mixFactor'] = (self.counter.current_status - 50)/70
         self.clear(arcade.color.GRAY)
         self.camera.use()
 
@@ -187,7 +193,7 @@ class GameView(arcade.View):
         if self.key_tracker[arcade.key.SPACE] and not self.shot:
             sounds["gunshot"].play()
             self.shot = True
-            bullet = Bullet(self.mod_tracker.player_damage(1))
+            bullet = Bullet(self.mod_tracker.player_damage(1), self.player.direction == 1)
             self.physics_engine.add_sprite(bullet, mass=0.1, damping=1, friction=0.6, gravity=(0, -300),
                                            collision_type="bullet")
             self.physics_engine.set_position(bullet, (self.player.center_x + 16 * self.player.direction,
@@ -227,6 +233,7 @@ class GameView(arcade.View):
             arcade.stop_sound(self.current_steps)
             self.current_steps = None
         for enemy in self.enemies:
+            enemy.update_animation()
             if enemy.reached_boundry():
                 enemy.direction = not enemy.direction
             if enemy.direction:  # direction = True -> Movement to the right

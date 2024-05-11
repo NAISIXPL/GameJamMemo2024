@@ -16,6 +16,10 @@ textures = {
     3: {
         -1: arcade.texture.load_texture("assets/animation/LYSY_SP.png"),
         1: arcade.texture.load_texture("assets/animation/LYSY_SL.png")
+    },
+    4: {
+        -1: arcade.texture.load_texture("assets/animation/LYSY_UL.png"),
+        1: arcade.texture.load_texture("assets/animation/LYSY_UP.png")
     }
 }
 
@@ -45,6 +49,7 @@ class PlayerSprite(arcade.Sprite):
 
     def update_animation(self, delta_time: float = 1 / 60):
         if self.jumping:
+            self.texture = textures[4][self.direction]
             return
         self.cur_texture += 1
         if self.stationary:

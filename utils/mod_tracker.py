@@ -21,3 +21,4 @@ class ModTracker:
         if self.high_counter.current_status < self.high_counter.lower_thr:
             return 2 * value
         return value
+

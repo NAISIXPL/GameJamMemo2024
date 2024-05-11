@@ -3,11 +3,11 @@ import arcade
 # Sprite class for object dropped after killing the enemy
 # x,y - position of sprite
 
-"""textures = {
-    1: arcade.texture.load_texture("red.png"),
-    0: arcade.texture.load_texture("brown.png"),
-    -1: arcade.texture.load_texture("blue.png")
-}"""
+textures = {
+    1: arcade.texture.load_texture("assets/animation/CANDY_2.png"),
+    0: arcade.texture.load_texture("assets/animation/CANDY_3.png"),
+    -1: arcade.texture.load_texture("assets/animation/CANDY_1.png")
+}
 
 
 class Candy(arcade.Sprite):
@@ -17,8 +17,8 @@ class Candy(arcade.Sprite):
         self.center_y = y
         self.points = points
         if points > 0:
-            self.texture = arcade.make_soft_square_texture(10, arcade.color.BLUE)
+            self.texture = textures[1]
         elif points == 0:
-            self.texture = arcade.make_soft_square_texture(10, arcade.color.BROWN)
+            self.texture = textures[0]
         else:
-            self.texture = arcade.make_soft_square_texture(10, arcade.color.RED)
+            self.texture = textures[-1]
