@@ -22,3 +22,12 @@ class ModTracker:
             return 2 * value
         return value
 
+    def over_red(self) -> bool:
+        if self.high_counter.current_status < 10:
+            return True
+        return False
+
+    def over_blue(self) -> bool:
+        if self.high_counter.current_status > 90:
+            return True
+        return False

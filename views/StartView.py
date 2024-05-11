@@ -11,7 +11,7 @@ class StartView(arcade.View):
     def on_draw(self):
         self.clear()
         arcade.load_font("assets/RETROTECH.ttf")
-        arcade.draw_text("Title", self.window.width / 2, self.window.height / 2, font_name="RETROTECH",
+        arcade.draw_text("Lodz.py", self.window.width / 2, self.window.height / 2, font_name="RETROTECH",
                          anchor_x="center", anchor_y="center",
                          font_size=60)
         arcade.draw_text("Press space to start", self.window.width / 2, self.window.height / 4,

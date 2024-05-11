@@ -1,14 +1,15 @@
+import math
 import random
-import time
 
-from sprites.enemy import Enemy
 import arcade
 from pyglet.math import Vec2
 
 from sprites.bullet import Bullet
 from sprites.candy import Candy
+from sprites.enemy import Enemy
 from sprites.player_sprite import PlayerSprite
 from utils.SpriteLoader import SpriteLoader
+from utils.health_bar import HealthBar
 from utils.high_counter import HighCounter
 from utils.key_tracker import KeyTracker
 from utils.mod_tracker import ModTracker
@@ -35,7 +36,7 @@ class GameView(arcade.View):
         self.player_spawn_x = 340
         self.player_spawn_y = 130
         self.tile_scale = 1
-        self.health = 6
+        self.health = HealthBar(self.window.height // 1.1)
         self.quad_fs = None
         self.camera = None
         self.gui_camera = None
@@ -119,8 +120,9 @@ class GameView(arcade.View):
                 _enemy_sprite.kill()
 
         def player_hit_handler(player, _enemy_sprite, _arbiter, _space, _data):
-            self.health -= self.mod_tracker.mob_damage(1)
-            if self.health <= 0:
+            self.health.health -= self.mod_tracker.mob_damage(1)
+            self.health.update()
+            if self.health.health <= 0:
                 self.manager.window.show_view(GameOverView(self.manager))
             if player.center_x - _enemy_sprite.center_x > 0:
                 self.physics_engine.apply_impulse(player, [80, 0])
@@ -170,10 +172,13 @@ class GameView(arcade.View):
         self.enemies.draw()
         self.quad_fs.render(self.prog)
         self.gui_camera.use()
+        self.health.draw()
         self.progress.draw()
 
     def on_key_press(self, symbol: int, modifiers: int):
         self.key_tracker.key_pressed(symbol)
+        if symbol == arcade.key.KEY_1:
+            self.manager.next()
 
     def on_key_release(self, _symbol: int, _modifiers: int):
         self.key_tracker.key_released(_symbol)
@@ -186,6 +191,13 @@ class GameView(arcade.View):
 
         if not self.key_tracker[arcade.key.SPACE]:
             self.shot = False
+        if self.mod_tracker.over_blue():
+            shake_direction = random.random() * 2 * math.pi
+            shake_amplitude = 1.5
+            shake_vector = Vec2(math.cos(shake_direction) * shake_amplitude,
+                                math.sin(shake_direction) * shake_amplitude)
+            self.camera.shake(shake_vector)
+            self.gui_camera.shake(shake_vector)
         if self.key_tracker[arcade.key.SPACE] and not self.shot:
             sounds["gunshot"].play()
             self.shot = True
@@ -209,11 +221,17 @@ class GameView(arcade.View):
 
         force = [0, 0]
         if self.key_tracker[arcade.key.LEFT]:
-            force[0] = -self.mod_tracker.player_speed(PLAYER_MOVE_FORCE)
-            self.physics_engine.set_friction(self.player, 0)
+            if self.mod_tracker.over_red():
+                force[0] = self.mod_tracker.player_speed(PLAYER_MOVE_FORCE)
+            else:
+                force[0] = -self.mod_tracker.player_speed(PLAYER_MOVE_FORCE)
+            self.physics_engine.set_friction(self.player, 0.1)
         elif self.key_tracker[arcade.key.RIGHT]:
-            force[0] = self.mod_tracker.player_speed(PLAYER_MOVE_FORCE)
-            self.physics_engine.set_friction(self.player, 0)
+            if self.mod_tracker.over_red():
+                force[0] = -self.mod_tracker.player_speed(PLAYER_MOVE_FORCE)
+            else:
+                force[0] = self.mod_tracker.player_speed(PLAYER_MOVE_FORCE)
+            self.physics_engine.set_friction(self.player, 0.1)
         else:
             self.physics_engine.set_friction(self.player, 1)
         if (self.key_tracker[arcade.key.UP] and not self.jumped
