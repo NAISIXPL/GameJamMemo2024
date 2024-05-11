@@ -4,6 +4,7 @@ from sprites.candy import Candy
 from sprites.player_sprite import PlayerSprite
 from utils.high_counter import HighCounter
 from utils.key_tracker import KeyTracker
+from utils.mod_tracker import ModTracker
 from utils.progress_bar import HighBar
 
 PLAYER_MOVE_FORCE = 500
@@ -27,6 +28,7 @@ class GameView(arcade.View):
         self.jumped = False
         self.counter = None
         self.progress = None
+        self.mod_tracker = None
 
     def on_show_view(self):
         self.window.set_mouse_visible(False)
@@ -37,6 +39,7 @@ class GameView(arcade.View):
         self.candies.append(Candy(130, 100, 10))
         self.player = PlayerSprite()
         self.counter = HighCounter()
+        self.mod_tracker = ModTracker(self.counter)
         self.progress = HighBar(self.counter, self.window.height // 1.25, 725)
         self.player.set_position(self.player_spawn_x, self.player_spawn_y)
         self.physics_engine = arcade.PymunkPhysicsEngine(gravity=(0, -500), damping=1)
@@ -97,15 +100,15 @@ class GameView(arcade.View):
 
         force = [0, 0]
         if self.key_tracker[arcade.key.LEFT]:
-            force[0] = -PLAYER_MOVE_FORCE
+            force[0] = -self.mod_tracker.player_speed(PLAYER_MOVE_FORCE)
             self.physics_engine.set_friction(self.player, 0)
         elif self.key_tracker[arcade.key.RIGHT]:
-            force[0] = PLAYER_MOVE_FORCE
+            force[0] = self.mod_tracker.player_speed(PLAYER_MOVE_FORCE)
             self.physics_engine.set_friction(self.player, 0)
         else:
             self.physics_engine.set_friction(self.player, 1)
         if (self.key_tracker[arcade.key.UP] and not self.jumped
                 and self.physics_engine.is_on_ground(self.player)):
             self.jumped = True
-            force[1] = PLAYER_JUMP_FORCE
+            force[1] = self.mod_tracker.player_jump(PLAYER_JUMP_FORCE)
         self.physics_engine.apply_force(self.player, force)
